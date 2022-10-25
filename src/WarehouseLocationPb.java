@@ -22,43 +22,46 @@ public class WarehouseLocationPb {
         // maintenance cost
         int C = 30;
         // capacity of each warehouse
-        int[] K = new int[]{1, 4, 2, 1, 3};
+        int[] K = new int[] { 1, 4, 2, 1, 3 };
         // matrix of supply costs, store x warehouse
-        int[][] P = new int[][]{
-                {20, 24, 11, 25, 30},
-                {28, 27, 82, 83, 74},
-                {74, 97, 71, 96, 70},
-                {2, 55, 73, 69, 61},
-                {46, 96, 59, 83, 4},
-                {42, 22, 29, 67, 59},
-                {1, 5, 73, 59, 56},
-                {10, 73, 13, 43, 96},
-                {93, 35, 63, 85, 46},
-                {47, 65, 55, 71, 95}};
+        int[][] P = new int[][] {
+                { 20, 24, 11, 25, 30 },
+                { 28, 27, 82, 83, 74 },
+                { 74, 97, 71, 96, 70 },
+                { 2, 55, 73, 69, 61 },
+                { 46, 96, 59, 83, 4 },
+                { 42, 22, 29, 67, 59 },
+                { 1, 5, 73, 59, 56 },
+                { 10, 73, 13, 43, 96 },
+                { 93, 35, 63, 85, 46 },
+                { 47, 65, 55, 71, 95 } };
 
         // A new model instance
-        // todo
+        Model model = new Model("Warehouse");
 
         // VARIABLES
-        // todo
+        BoolVar[] openedWarehouses = model.boolVarArray("openedWarehouses", W);
+        IntVar[] supppliers = model.intVarArray("suppliers", S, 0, W - 1);
 
         // CONSTRAINTS
         // todo
 
         // RESOLUTION
-        /*model.setObjective(Model.MINIMIZE, tot_cost);
-        Solver solver = model.getSolver();
-        solver.setSearch(Search.intVarSearch(
-                new VariableSelectorWithTies<>(
-                        new FirstFail(model),
-                        new Smallest()),
-                new IntDomainMiddle(false),
-                ArrayUtils.append(supplier, cost, open))
-        );
-        solver.showShortStatistics();
-        while (solver.solve()) {
-            prettyPrint(model, open, W, supplier, S, tot_cost);
-        }*/
+        /*
+         * model.setObjective(Model.MINIMIZE, tot_cost);
+         * Solver solver = model.getSolver();
+         * solver.setSearch(Search.intVarSearch(
+         * new VariableSelectorWithTies<>(
+         * new FirstFail(model),
+         * new Smallest()),
+         * new IntDomainMiddle(false),
+         * ArrayUtils.append(supplier, cost, open))
+         * );
+         * solver.showShortStatistics();
+         * while (solver.solve()) {
+         * prettyPrint(model, open, W, supplier, S, tot_cost);
+         * }
+         */
     }
 
     private static void prettyPrint(Model model, IntVar[] open, int W, IntVar[] supplier, int S, IntVar tot_cost) {
