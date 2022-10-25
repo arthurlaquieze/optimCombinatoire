@@ -10,6 +10,7 @@ import org.chocosolver.solver.variables.Task;
 
 public class Pharmacy {
     public static void pharmacyProblem(int nOrders) {
+        nOrders = 1;
         // create processes
         Processus toPowderComprime = new Processus(20, 1, "Transformation to comprimé power");
         Processus toPowderGelule = new Processus(7, 1, "Transformation to gélule powder");
@@ -26,7 +27,10 @@ public class Pharmacy {
         processes.add(powderToComprime);
         processes.add(powderToGelule);
         processes.add(powderToSachet);
-        List<Order> orders = generateOrders(nOrders);
+
+        // List<Order> orders = generateOrders(nOrders);
+        List<Order> orders = new ArrayList<Order>();
+        orders.add(new Order(1, 0, 0, 2));
 
         Model model = new Model("Pharmacy");
 
@@ -51,7 +55,7 @@ public class Pharmacy {
         Task[] transformingFromPowderToGeluleTasks = new Task[nOrders];
         Task[] transformingFromPowderToSachetTasks = new Task[nOrders];
         // for (Order order : orders) {
-        for (int i = 0; i < nOrders; i++) {
+        for (int i = 0; i < 1; i++) {
             Order order = orders.get(i);
             // add tasks for step 1, transformation to powder
             {
@@ -76,6 +80,8 @@ public class Pharmacy {
                 transformingFromPowderToSachetTasks[i] = new Task(model,
                         makingPowderTasks[3 * i + 2].getEnd().getValue(), 9999999,
                         order.getSachetsQuantity() * powderToSachet.getDuration(), 0, order.getDueTime());
+
+                System.out.println("begin of making comprimés " + makingPowderTasks[3 * i].getEnd().getValue());
             }
         }
 
@@ -93,6 +99,9 @@ public class Pharmacy {
         System.out.println((solution));
         System.out.println("\n" + getMaxEnd(makingPowderTasks, transformingFromPowderToComprimeTasks,
                 transformingFromPowderToGeluleTasks, transformingFromPowderToSachetTasks) / (24 * 60) + "e jour");
+
+        System.out.println("\n" + getMaxEnd(makingPowderTasks, transformingFromPowderToComprimeTasks,
+                transformingFromPowderToGeluleTasks, transformingFromPowderToSachetTasks) + " minutes");
 
     }
 
