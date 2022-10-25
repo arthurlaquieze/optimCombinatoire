@@ -1,10 +1,12 @@
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solution;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.IntVar;
 
 public class Start {
 
     public static void main(String[] args) {
-        int n = 10;
+        int n = 8;
         Model model = new Model("nQueens");
         System.out.println(model.getName());
 
@@ -17,12 +19,18 @@ public class Start {
         IntVar[] tableau = model.intVarArray("tableau", n, 1, n);
 
         // ajout condition sur les colonnes, toutes différentes.
-        model.allDifferent(tableau);
+        model.allDifferent(tableau).post();
 
         // ajout contraintes des diagonales
         for (int i = 0; i < n; i++) {
             addDiagonalCondition(model, tableau, i);
         }
+
+        // find and print solution
+        Solver solver = model.getSolver();
+        Solution solution = solver.findSolution();
+
+        System.out.println(solution.toString());
     }
 
     public static void addDiagonalCondition(Model model, IntVar[] tableau, int row) {
