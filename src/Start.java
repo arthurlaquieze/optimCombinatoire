@@ -30,7 +30,9 @@ public class Start {
         Solver solver = model.getSolver();
         Solution solution = solver.findSolution();
 
-        System.out.println(solution.toString());
+        for (int i = 0; i < n; i++) {
+            System.out.println("row" + i + " = " + solution.getIntVal(tableau[i]));
+        }
     }
 
     public static void addDiagonalCondition(Model model, IntVar[] tableau, int row) {
