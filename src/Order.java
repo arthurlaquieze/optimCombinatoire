@@ -18,7 +18,7 @@ public class Order {
         this.comprimesQuantity = randomInt(2, 200);
         this.gelulesQuantity = randomInt(2, 200);
         this.sachetsQuantity = randomInt(2, 200);
-        this.dueDate = randomInt(2, 200);
+        this.dueDate = randomInt(2, 500);
     }
 
     public static int randomInt(int min, int max) {

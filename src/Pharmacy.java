@@ -6,9 +6,7 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
 public class Pharmacy {
-    public static void pharmacyProblem() {
-        int nOrders = 100; // number of orders to simulate
-
+    public static void pharmacyProblem(int nOrders) {
         // create processes
         Processus toPowderComprime = new Processus(20, 1, "Transformation to comprimé power");
         Processus toPowderGelule = new Processus(7, 1, "Transformation to gélule powder");
@@ -49,6 +47,7 @@ public class Pharmacy {
     }
 
     public static void main(String[] args) {
-        pharmacyProblem();
+        int nOrders = 10; // number of orders to simulate
+        pharmacyProblem(nOrders);
     }
 }
