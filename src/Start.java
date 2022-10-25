@@ -18,5 +18,24 @@ public class Start {
 
         // ajout condition sur les colonnes, toutes différentes.
         model.allDifferent(tableau);
+
+        // ajout contraintes des diagonales
+        for (int i = 0; i < n; i++) {
+            addDiagonalCondition(model, tableau, i);
+        }
+    }
+
+    public static void addDiagonalCondition(Model model, IntVar[] tableau, int row) {
+        int max = tableau.length;
+
+        for (int i = 0; i < max; i++) {
+            if (i == row) {
+                continue;
+            }
+            // contrainte sur diagonale
+            model.arithm(tableau[row], "!=", tableau[i].sub(i - row).intVar()).post();
+            // antidiagonale (bas gauche -> haut droit)
+            model.arithm(tableau[row], "!=", tableau[i].add(i - row).intVar()).post();
+        }
     }
 }
