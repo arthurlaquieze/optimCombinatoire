@@ -5,7 +5,6 @@ import java.util.List;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
@@ -80,6 +79,8 @@ public class Pharmacy {
             }
         }
 
+        IntVar maxEnd = model.intVar("maxEnd", 0, 24 * 60 * 500);
+
         // add tasks to model
         model.cumulative(makingPowderTasks, heightsPowder, makingPowderCapacity).post();
         model.cumulative(transformingFromPowderToComprimeTasks, heightsStep2, transformingFromPowderCapacity).post();
@@ -87,13 +88,16 @@ public class Pharmacy {
         model.cumulative(transformingFromPowderToSachetTasks, heightsStep2, transformingFromPowderCapacity).post();
         // System.out.println(model.getSolver().findSolution());
 
-        IntVar maxEnd = model.intVar("maxEnd", getMaxEnd(makingPowderTasks, transformingFromPowderToComprimeTasks,
-                transformingFromPowderToGeluleTasks, transformingFromPowderToSachetTasks));
+        model.arithm(maxEnd, "=", getMaxEnd(makingPowderTasks, transformingFromPowderToComprimeTasks,
+                transformingFromPowderToGeluleTasks, transformingFromPowderToSachetTasks)).post();
+
+        // model.
+        // model.dcmst
 
         model.setObjective(false, maxEnd);
         Solver solver = model.getSolver();
-        // Solution solution = solver.findSolution();
-        Solution solution = solver.findOptimalSolution(maxEnd, false);
+        Solution solution = solver.findSolution();
+        // Solution solution = solver.findOptimalSolution(maxEnd, false);
 
         System.out.println((solution));
         System.out.println(maxEnd);
