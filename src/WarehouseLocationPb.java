@@ -44,8 +44,7 @@ public class WarehouseLocationPb {
         IntVar[] supppliers = model.intVarArray("suppliers", S, 0, W - 1);
 
         // CONSTRAINTS
-        // todo
-
+        checkSupplier(model, openedWarehouses, supppliers);
         // RESOLUTION
         /*
          * model.setObjective(Model.MINIMIZE, tot_cost);
@@ -64,6 +63,13 @@ public class WarehouseLocationPb {
          */
     }
 
+    public static void checkSupplier(Model model, BoolVar[] opened, IntVar[] supplier) {
+        for (int i = 0; i < supplier.length; i++) {
+            model.arithm(opened[supplier[i].getValue()], "=", 1).post();
+
+        }
+
+    }
     private static void prettyPrint(Model model, IntVar[] open, int W, IntVar[] supplier, int S, IntVar tot_cost) {
         StringBuilder st = new StringBuilder();
         st.append("Solution #").append(model.getSolver().getSolutionCount()).append("\n");
