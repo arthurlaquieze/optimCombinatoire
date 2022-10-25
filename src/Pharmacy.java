@@ -1,7 +1,10 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solution;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
@@ -29,58 +32,95 @@ public class Pharmacy {
         Model model = new Model("Pharmacy");
 
         // ordre de traitement des commandes
-        IntVar[] processingOrder = model.intVarArray("Processing order", nOrders, 1, nOrders);
+        // IntVar[] processingOrder = model.intVarArray("Processing order", nOrders, 1,
+        // nOrders);
         // list process occupé ou non (boolean)
-        BoolVar[] occupied = model.boolVarArray("Occupied processes", processes.size());
+        // BoolVar[] occupied = model.boolVarArray("Occupied processes",
+        // processes.size());
 
-        IntVar[] heightsPowder = new IntVar[3];
-        heightsPowder[0] = model.intVar(1);
-        heightsPowder[1] = model.intVar(1);
-        heightsPowder[2] = model.intVar(1);
+        IntVar[] heightsPowder = new IntVar[3 * nOrders];
+        Arrays.fill(heightsPowder, model.intVar(1));
         IntVar makingPowderCapacity = model.intVar(1);
 
-        IntVar[] heightsStep2 = new IntVar[3];
-        heightsStep2[0] = model.intVar(2);
-        heightsStep2[1] = model.intVar(2);
-        heightsStep2[2] = model.intVar(2);
+        IntVar[] heightsStep2 = new IntVar[nOrders];
+        Arrays.fill(heightsStep2, model.intVar(1));
         IntVar transformingFromPowderCapacity = model.intVar(1);
 
         // add tasks foreach order
-        for (Order order : orders) {
+        Task[] makingPowderTasks = new Task[3 * nOrders];
+        Task[] transformingFromPowderToComprimeTasks = new Task[nOrders];
+        Task[] transformingFromPowderToGeluleTasks = new Task[nOrders];
+        Task[] transformingFromPowderToSachetTasks = new Task[nOrders];
+        // for (Order order : orders) {
+        for (int i = 0; i < nOrders; i++) {
+            Order order = orders.get(i);
             // add tasks for step 1, transformation to powder
-            Task[] makingPowderTasks = new Task[3];
             {
                 // Task makeComprimePowder ; Task makeGelulePowder ; Task makeSachetPowder
-                makingPowderTasks[0] = new Task(model, 0, 9999999,
+                makingPowderTasks[3 * i] = new Task(model, 0, 9999999,
                         order.getComprimesQuantity() * toPowderComprime.getDuration(), 0, order.getDueTime());
-                makingPowderTasks[1] = new Task(model, 0, 9999999,
+                makingPowderTasks[3 * i + 1] = new Task(model, 0, 9999999,
                         order.getGelulesQuantity() * toPowderGelule.getDuration(), 0, order.getDueTime());
-                makingPowderTasks[2] = new Task(model, 0, 9999999,
+                makingPowderTasks[3 * i + 2] = new Task(model, 0, 9999999,
                         order.getSachetsQuantity() * toPowderSachet.getDuration(), 0, order.getDueTime());
 
-                // add tasks to model so that powder transformation can only be done
-                // one at a time
-                model.cumulative(makingPowderTasks, heightsPowder, makingPowderCapacity).post();
             }
             // add tasks for step 2, transformation from powder to gélules, comprimés and
             // sachets
             {
-                Task[] transformingFromPowderTasks = new Task[3];
-                transformingFromPowderTasks[0] = new Task(model,
-                        makingPowderTasks[0].getEnd().getValue(), 9999999,
+                transformingFromPowderToComprimeTasks[i] = new Task(model,
+                        makingPowderTasks[3 * i].getEnd().getValue(), 9999999,
                         order.getComprimesQuantity() * powderToComprime.getDuration(), 0, order.getDueTime());
-                transformingFromPowderTasks[1] = new Task(model,
-                        makingPowderTasks[1].getEnd().getValue(), 9999999,
+                transformingFromPowderToGeluleTasks[i] = new Task(model,
+                        makingPowderTasks[3 * i + 1].getEnd().getValue(), 9999999,
                         order.getGelulesQuantity() * powderToGelule.getDuration(), 0, order.getDueTime());
-                transformingFromPowderTasks[2] = new Task(model,
-                        makingPowderTasks[2].getEnd().getValue(), 9999999,
+                transformingFromPowderToSachetTasks[i] = new Task(model,
+                        makingPowderTasks[3 * i + 2].getEnd().getValue(), 9999999,
                         order.getSachetsQuantity() * powderToSachet.getDuration(), 0, order.getDueTime());
-
-                // add tasks to model so that powder transformation can be done concurrently
-                model.cumulative(transformingFromPowderTasks, heightsStep2, transformingFromPowderCapacity).post();
             }
         }
-        System.out.println(model.getSolver().findSolution());
+
+        // add tasks to model
+        model.cumulative(makingPowderTasks, heightsPowder, makingPowderCapacity).post();
+        model.cumulative(transformingFromPowderToComprimeTasks, heightsStep2, transformingFromPowderCapacity).post();
+        model.cumulative(transformingFromPowderToGeluleTasks, heightsStep2, transformingFromPowderCapacity).post();
+        model.cumulative(transformingFromPowderToSachetTasks, heightsStep2, transformingFromPowderCapacity).post();
+        // System.out.println(model.getSolver().findSolution());
+
+        IntVar maxEnd = model.intVar("maxEnd", getMaxEnd(makingPowderTasks, transformingFromPowderToComprimeTasks,
+                transformingFromPowderToGeluleTasks, transformingFromPowderToSachetTasks));
+
+        model.setObjective(false, maxEnd);
+        Solver solver = model.getSolver();
+        // Solution solution = solver.findSolution();
+        Solution solution = solver.findOptimalSolution(maxEnd, false);
+
+        System.out.println((solution));
+        System.out.println(maxEnd);
+
+    }
+
+    public static int getMaxEnd(Task[] makingPowderTasks, Task[] transformingFromPowderToComprimeTasks,
+            Task[] transformingFromPowderToGeluleTasks, Task[] transformingFromPowderToSachetTasks) {
+        int maxEnd = 0;
+
+        System.out.println("called");
+
+        maxEnd = maxEndOneTaskList(makingPowderTasks, maxEnd);
+        maxEnd = maxEndOneTaskList(transformingFromPowderToComprimeTasks, maxEnd);
+        maxEnd = maxEndOneTaskList(transformingFromPowderToGeluleTasks, maxEnd);
+        maxEnd = maxEndOneTaskList(transformingFromPowderToSachetTasks, maxEnd);
+
+        return maxEnd;
+    }
+
+    private static int maxEndOneTaskList(Task[] tasks, int maxEnd) {
+        for (Task task : tasks) {
+            if (task.getEnd().getValue() > maxEnd) {
+                maxEnd = task.getEnd().getValue();
+            }
+        }
+        return maxEnd;
     }
 
     public static List<Order> generateOrders(int n) {
