@@ -79,28 +79,20 @@ public class Pharmacy {
             }
         }
 
-        IntVar maxEnd = model.intVar("maxEnd", 0, 24 * 60 * 500);
-
-        // add tasks to model
         model.cumulative(makingPowderTasks, heightsPowder, makingPowderCapacity).post();
         model.cumulative(transformingFromPowderToComprimeTasks, heightsStep2, transformingFromPowderCapacity).post();
         model.cumulative(transformingFromPowderToGeluleTasks, heightsStep2, transformingFromPowderCapacity).post();
         model.cumulative(transformingFromPowderToSachetTasks, heightsStep2, transformingFromPowderCapacity).post();
-        // System.out.println(model.getSolver().findSolution());
 
-        model.arithm(maxEnd, "=", getMaxEnd(makingPowderTasks, transformingFromPowderToComprimeTasks,
-                transformingFromPowderToGeluleTasks, transformingFromPowderToSachetTasks)).post();
-
-        // model.
-        // model.dcmst
-
-        model.setObjective(false, maxEnd);
+        model.setObjective(false, model.intVar(getMaxEnd(makingPowderTasks, transformingFromPowderToComprimeTasks,
+                transformingFromPowderToGeluleTasks, transformingFromPowderToSachetTasks)));
         Solver solver = model.getSolver();
         Solution solution = solver.findSolution();
         // Solution solution = solver.findOptimalSolution(maxEnd, false);
 
         System.out.println((solution));
-        System.out.println(maxEnd);
+        System.out.println("\n" + getMaxEnd(makingPowderTasks, transformingFromPowderToComprimeTasks,
+                transformingFromPowderToGeluleTasks, transformingFromPowderToSachetTasks) / (24 * 60) + "e jour");
 
     }
 
