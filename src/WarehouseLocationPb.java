@@ -70,6 +70,7 @@ public class WarehouseLocationPb {
         }
 
     }
+
     private static void prettyPrint(Model model, IntVar[] open, int W, IntVar[] supplier, int S, IntVar tot_cost) {
         StringBuilder st = new StringBuilder();
         st.append("Solution #").append(model.getSolver().getSolutionCount()).append("\n");
