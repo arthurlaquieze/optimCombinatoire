@@ -2,7 +2,7 @@ public class Order {
     private int comprimesQuantity;
     private int gelulesQuantity;
     private int sachetsQuantity;
-    private int dueDate; // due date as number of days from now
+    private int dueDate; // due date as number of days from start
 
     public Order(int comprimesQuantity, int gelulesQuantity, int sachetsQuantity, int dueDate) {
         this.comprimesQuantity = comprimesQuantity;
@@ -29,6 +29,13 @@ public class Order {
     public String toString() {
         return "Order [comprimesQuantity=" + comprimesQuantity + ", gelulesQuantity=" + gelulesQuantity
                 + ", sachetsQuantity=" + sachetsQuantity + ", dueDate=" + dueDate + "]";
+    }
+
+    public int getDueTime() {
+        /**
+         * Get due date in minutes from start
+         */
+        return 24 * 60 * dueDate;
     }
 
     public int getComprimesQuantity() {

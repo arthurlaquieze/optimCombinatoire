@@ -1,7 +1,7 @@
 public class Processus {
-    int duration; // time to process one unit.
-    int step; // step it is in the process
-    String name;
+    private int duration; // time to process one unit. in minutes
+    private int step; // step it is in the process
+    private String name;
 
     public Processus(int duration, int step, String name) {
         this.duration = duration;
@@ -17,6 +17,18 @@ public class Processus {
     @Override
     public String toString() {
         return "Processus [duration=" + duration + ", step=" + step + ", name=" + name + "]";
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public int getStep() {
+        return step;
+    }
+
+    public String getName() {
+        return name;
     }
 
 }
