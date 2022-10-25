@@ -13,19 +13,21 @@ public class Pharmacy {
         Processus powderToGelule = new Processus(5, 2, "Conditionnement vers gélule");
         Processus powderToSachet = new Processus(20, 2, "Conditionnement vers sachet");
 
-        List<Order> orders = generateOrders();
+        List<Order> orders = generateOrders(100);
 
         Model model = new Model("Pharmacy");
 
     }
 
-    public static List<Order> generateOrders() {
+    public static List<Order> generateOrders(int n) {
+        /**
+         * Generate n random orders
+         */
         List<Order> orders = new ArrayList<Order>();
-        orders.add(new Order(4, 2, 5, 10));
-        orders.add(new Order(8, 8, 3, 8));
-        orders.add(new Order(2, 12, 5, 15));
-        orders.add(new Order(5, 1, 15, 18));
-        orders.add(new Order(4, 9, 5, 11));
+
+        for (int i = 0; i < n; i++) {
+            orders.add(new Order());
+        }
 
         return orders;
     }
