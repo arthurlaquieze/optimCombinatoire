@@ -10,7 +10,7 @@ import org.chocosolver.solver.variables.Task;
 
 public class Pharmacy {
     public static void pharmacyProblem(int nOrders) {
-        nOrders = 1;
+        // nOrders = 1;
         // create processes
         Processus toPowderComprime = new Processus(20, 1, "Transformation to comprimé power");
         Processus toPowderGelule = new Processus(7, 1, "Transformation to gélule powder");
@@ -29,8 +29,9 @@ public class Pharmacy {
         processes.add(powderToSachet);
 
         // List<Order> orders = generateOrders(nOrders);
-        List<Order> orders = new ArrayList<Order>();
-        orders.add(new Order(1, 0, 0, 2));
+        // List<Order> orders = new ArrayList<Order>();
+        // orders.add(new Order(1, 0, 0, 2));
+        List<Order> orders = generateOrders(nOrders);
 
         Model model = new Model("Pharmacy");
 
@@ -55,7 +56,7 @@ public class Pharmacy {
         Task[] transformingFromPowderToGeluleTasks = new Task[nOrders];
         Task[] transformingFromPowderToSachetTasks = new Task[nOrders];
         // for (Order order : orders) {
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < nOrders; i++) {
             Order order = orders.get(i);
             // add tasks for step 1, transformation to powder
             {
@@ -68,24 +69,36 @@ public class Pharmacy {
                         order.getSachetsQuantity() * toPowderSachet.getDuration(), 0, order.getDueTime());
 
             }
+        }
+
+        model.cumulative(makingPowderTasks, heightsPowder, makingPowderCapacity).post();
+
+        for (int i = 0; i < nOrders; i++) {
+            Order order = orders.get(i);
             // add tasks for step 2, transformation from powder to gélules, comprimés and
             // sachets
             {
                 transformingFromPowderToComprimeTasks[i] = new Task(model,
-                        makingPowderTasks[3 * i].getEnd().getValue(), 9999999,
+                        0, 9999999,
                         order.getComprimesQuantity() * powderToComprime.getDuration(), 0, order.getDueTime());
                 transformingFromPowderToGeluleTasks[i] = new Task(model,
-                        makingPowderTasks[3 * i + 1].getEnd().getValue(), 9999999,
+                        0, 9999999,
                         order.getGelulesQuantity() * powderToGelule.getDuration(), 0, order.getDueTime());
                 transformingFromPowderToSachetTasks[i] = new Task(model,
-                        makingPowderTasks[3 * i + 2].getEnd().getValue(), 9999999,
+                        0, 9999999,
                         order.getSachetsQuantity() * powderToSachet.getDuration(), 0, order.getDueTime());
 
-                System.out.println("begin of making comprimés " + makingPowderTasks[3 * i].getEnd().getValue());
+                model.arithm(transformingFromPowderToComprimeTasks[i].getStart(), ">=",
+                        makingPowderTasks[3 * i].getEnd()).post();
+                model.arithm(transformingFromPowderToGeluleTasks[i].getStart(), ">=",
+                        makingPowderTasks[3 * i + 1].getEnd()).post();
+                model.arithm(transformingFromPowderToSachetTasks[i].getStart(), ">=",
+                        makingPowderTasks[3 * i + 2].getEnd()).post();
+
+                System.out.println("begin of making comprimés at " + makingPowderTasks[3 * i].getEnd().getValue());
             }
         }
 
-        model.cumulative(makingPowderTasks, heightsPowder, makingPowderCapacity).post();
         model.cumulative(transformingFromPowderToComprimeTasks, heightsStep2, transformingFromPowderCapacity).post();
         model.cumulative(transformingFromPowderToGeluleTasks, heightsStep2, transformingFromPowderCapacity).post();
         model.cumulative(transformingFromPowderToSachetTasks, heightsStep2, transformingFromPowderCapacity).post();
