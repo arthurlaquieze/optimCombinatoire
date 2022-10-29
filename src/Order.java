@@ -13,7 +13,7 @@ public class Order {
 
     public Order() {
         /**
-         * Generate random order
+         * Constructor that generates a random order
          */
         this.comprimesQuantity = randomInt(2, 200);
         this.gelulesQuantity = randomInt(2, 200);
