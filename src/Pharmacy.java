@@ -9,8 +9,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
 public class Pharmacy {
-    public static void pharmacyProblem(int nOrders) {
-        nOrders = 1;
+    public static void pharmacyProblem(List<Order> orders, int capacityStep1, boolean parallelStep2ComprimeGelule) {
+        int nOrders = orders.size();
 
         // create processes
         Processus toPowderComprime = new Processus(20, 1, "Transformation to comprimé power");
@@ -21,27 +21,18 @@ public class Pharmacy {
         Processus powderToGelule = new Processus(5, 2, "Conditionnement vers gélule");
         Processus powderToSachet = new Processus(20, 2, "Conditionnement vers sachet");
 
-        List<Processus> processes = new ArrayList<Processus>();
-        processes.add(toPowderComprime);
-        processes.add(toPowderGelule);
-        processes.add(toPowderSachet);
-        processes.add(powderToComprime);
-        processes.add(powderToGelule);
-        processes.add(powderToSachet);
-
-        List<Order> orders = new ArrayList<Order>();
-        orders.add(new Order(1, 0, 0, 2));
-        // List<Order> orders = generateOrders(nOrders);
-
         Model model = new Model("Pharmacy");
 
-        // capacity variable, i.e. one at a time
+        // capacity variable, i.e. one at a time or two with question 7
         IntVar[] heightsPowder = new IntVar[3 * nOrders];
         Arrays.fill(heightsPowder, model.intVar(1));
-        IntVar makingPowderCapacity = model.intVar(1);
+        IntVar makingPowderCapacity = model.intVar(capacityStep1);
 
         IntVar[] heightsStep2 = new IntVar[nOrders];
         Arrays.fill(heightsStep2, model.intVar(1));
+        IntVar[] heightsStep2Question4 = new IntVar[2 * nOrders];
+        Arrays.fill(heightsStep2Question4, model.intVar(1));
+
         IntVar transformingFromPowderCapacity = model.intVar(1);
 
         /**
@@ -105,15 +96,27 @@ public class Pharmacy {
                         makingPowderTasks[3 * i + 1].getEnd()).post();
                 model.arithm(transformingFromPowderToSachetTasks[i].getStart(), ">=",
                         makingPowderTasks[3 * i + 2].getEnd()).post();
-
-                System.out.println("begin of making comprimés at " + makingPowderTasks[3 * i].getEnd().getValue());
             }
         }
 
-        // post capacities constraints for step 2
-        model.cumulative(transformingFromPowderToComprimeTasks, heightsStep2, transformingFromPowderCapacity).post();
-        model.cumulative(transformingFromPowderToGeluleTasks, heightsStep2, transformingFromPowderCapacity).post();
+        // post capacities constraints for step 2.
         model.cumulative(transformingFromPowderToSachetTasks, heightsStep2, transformingFromPowderCapacity).post();
+
+        // differentiate from cases "Gélules et comprimés peuvent être traités en
+        // parallèle" and the opposite
+        if (parallelStep2ComprimeGelule == true) {
+            model.cumulative(transformingFromPowderToComprimeTasks, heightsStep2, transformingFromPowderCapacity)
+                    .post();
+            model.cumulative(transformingFromPowderToGeluleTasks, heightsStep2, transformingFromPowderCapacity).post();
+        } else {
+            Task[] comprimesOrGeluleTasks = new Task[2 * nOrders];
+            for (int i = 0; i < nOrders; i++) {
+                comprimesOrGeluleTasks[i] = transformingFromPowderToComprimeTasks[i];
+                comprimesOrGeluleTasks[i + nOrders] = transformingFromPowderToGeluleTasks[i];
+            }
+
+            model.cumulative(comprimesOrGeluleTasks, heightsStep2Question4, transformingFromPowderCapacity).post();
+        }
 
         List<Task[]> allTasks = List.of(makingPowderTasks, transformingFromPowderToComprimeTasks,
                 transformingFromPowderToGeluleTasks, transformingFromPowderToSachetTasks);
@@ -168,6 +171,46 @@ public class Pharmacy {
 
     public static void main(String[] args) {
         int nOrders = 10; // number of orders to simulate
-        pharmacyProblem(nOrders);
+        // int nOrders = Integer.parseInt(args[0]); // number of orders to simulate
+
+        /**
+         * either:
+         * 
+         * 2: first formulation,
+         * 
+         * 4: conditionnement en gélule et comprimé ne peut pas se faire en parallèle,
+         * étape 1 capacité de 1
+         * 
+         * 6: conditionnement en gélule et comprimé ne peut pas se faire en parallèle,
+         * étape 1 capacité de 2
+         */
+        int nQuestion = 4;
+
+        int capacityStep1;
+        boolean parallelStep2ComprimeGelule;
+
+        List<Order> orders = new ArrayList<Order>();
+        orders.add(new Order(1, 1, 0, 2));
+        // List<Order> orders = generateOrders(nOrders);
+
+        switch (nQuestion) {
+            case 2:
+                capacityStep1 = 1;
+                parallelStep2ComprimeGelule = true;
+                break;
+            case 4:
+                capacityStep1 = 1;
+                parallelStep2ComprimeGelule = false;
+                break;
+            case 6:
+                capacityStep1 = 2;
+                parallelStep2ComprimeGelule = false;
+                break;
+            default:
+                capacityStep1 = 1;
+                parallelStep2ComprimeGelule = true;
+        }
+
+        pharmacyProblem(orders, capacityStep1, parallelStep2ComprimeGelule);
     }
 }
