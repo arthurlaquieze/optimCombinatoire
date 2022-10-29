@@ -3,7 +3,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
@@ -125,13 +124,59 @@ public class Pharmacy {
         model.setObjective(false,
                 model.intVar(getMaxEnd(allTasks)));
 
+        // solve
         Solver solver = model.getSolver();
-        Solution solution = solver.findSolution();
+        solver.findSolution();
 
-        System.out.println((solution));
-        System.out.println("\n" + getMaxEnd(allTasks) / (24 * 60) + "e jour");
+        System.out.println("\ndernière commande traitée le " + getMaxEnd(allTasks) / (24 * 60) + "e jour");
+        System.out.println("cela représente " + getMaxEnd(allTasks) + " minutes à partir de maintenant\n");
 
-        System.out.println("\n" + getMaxEnd(allTasks) + " minutes");
+        for (Order order : orders) {
+            System.out.println(order);
+        }
+        System.out.println("");
+
+        // print solution
+        boolean inMinutes = true;
+        System.out.println("making powder (step 1)\t\t\t\t|| transform powder (step2)");
+        System.out.println(
+                "comprimé\tgélule\t\tsachet\t\t|| comprimé\tgélule\t\tsachet");
+        System.out.println("start\tend\tstart\tend\tstart\tend\t|| start\tend\tstart\tend\tstart\tend");
+        for (int i = 0; i < nOrders; i++) {
+            if (inMinutes) {
+                System.out.println(
+                        makingPowderTasks[i].getStart().getValue() + "\t" + makingPowderTasks[i].getEnd().getValue()
+                                + "\t"
+                                + makingPowderTasks[i + 1].getStart().getValue() + "\t"
+                                + makingPowderTasks[i + 1].getEnd().getValue() + "\t"
+                                + makingPowderTasks[i + 2].getStart().getValue() + "\t"
+                                + makingPowderTasks[i + 2].getEnd().getValue() + "\t"
+                                + "|| "
+                                + transformingFromPowderToComprimeTasks[i].getStart().getValue() + "\t"
+                                + transformingFromPowderToComprimeTasks[i].getEnd().getValue() + "\t"
+                                + transformingFromPowderToGeluleTasks[i].getStart().getValue() + "\t"
+                                + transformingFromPowderToGeluleTasks[i].getEnd().getValue() + "\t"
+                                + transformingFromPowderToSachetTasks[i].getStart().getValue() + "\t"
+                                + transformingFromPowderToSachetTasks[i].getEnd().getValue() + "\t");
+            } else {
+                System.out.println(
+                        makingPowderTasks[i].getStart().getValue() / (24 * 60) + "\t"
+                                + makingPowderTasks[i].getEnd().getValue() / (24 * 60)
+                                + "\t"
+                                + makingPowderTasks[i + 1].getStart().getValue() / (24 * 60) + "\t"
+                                + makingPowderTasks[i + 1].getEnd().getValue() / (24 * 60) + "\t"
+                                + makingPowderTasks[i + 2].getStart().getValue() / (24 * 60) + "\t"
+                                + makingPowderTasks[i + 2].getEnd().getValue() / (24 * 60) + "\t"
+                                + "|| "
+                                + transformingFromPowderToComprimeTasks[i].getStart().getValue() / (24 * 60) + "\t"
+                                + transformingFromPowderToComprimeTasks[i].getEnd().getValue() / (24 * 60) + "\t"
+                                + transformingFromPowderToGeluleTasks[i].getStart().getValue() / (24 * 60) + "\t"
+                                + transformingFromPowderToGeluleTasks[i].getEnd().getValue() / (24 * 60) + "\t"
+                                + transformingFromPowderToSachetTasks[i].getStart().getValue() / (24 * 60) + "\t"
+                                + transformingFromPowderToSachetTasks[i].getEnd().getValue() / (24 * 60) + "\t");
+
+            }
+        }
     }
 
     /**
@@ -143,8 +188,6 @@ public class Pharmacy {
      */
     public static int getMaxEnd(List<Task[]> tasksList) {
         int maxEnd = 0;
-
-        System.out.println("called");
 
         for (Task[] tasks : tasksList) {
             for (Task task : tasks) {
@@ -170,8 +213,18 @@ public class Pharmacy {
     }
 
     public static void main(String[] args) {
-        int nOrders = 10; // number of orders to simulate
-        // int nOrders = Integer.parseInt(args[0]); // number of orders to simulate
+        boolean useRandomOrders = false;
+        int nOrders;
+        List<Order> orders;
+
+        if (useRandomOrders) {
+            nOrders = 3; // number of orders to simulate
+            orders = generateOrders(nOrders);
+        } else {
+            nOrders = 1; // number of orders to simulate
+            orders = new ArrayList<Order>();
+            orders.add(new Order(1, 1, 0, 2));
+        }
 
         /**
          * either:
@@ -184,14 +237,10 @@ public class Pharmacy {
          * 6: conditionnement en gélule et comprimé ne peut pas se faire en parallèle,
          * étape 1 capacité de 2
          */
-        int nQuestion = 4;
+        int nQuestion = 2;
 
         int capacityStep1;
         boolean parallelStep2ComprimeGelule;
-
-        List<Order> orders = new ArrayList<Order>();
-        orders.add(new Order(1, 1, 0, 2));
-        // List<Order> orders = generateOrders(nOrders);
 
         switch (nQuestion) {
             case 2:

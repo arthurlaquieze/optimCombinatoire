@@ -27,8 +27,8 @@ public class Order {
 
     @Override
     public String toString() {
-        return "Order [comprimesQuantity=" + comprimesQuantity + ", gelulesQuantity=" + gelulesQuantity
-                + ", sachetsQuantity=" + sachetsQuantity + ", dueDate=" + dueDate + "]";
+        return "Commande de \t" + comprimesQuantity + " comprimés\t" + gelulesQuantity
+                + " gélules\t" + sachetsQuantity + " sachets\tpour dans " + dueDate + " j";
     }
 
     public int getDueTime() {
