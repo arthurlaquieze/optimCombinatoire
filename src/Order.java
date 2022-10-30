@@ -15,9 +15,9 @@ public class Order {
         /**
          * Constructor that generates a random order
          */
-        this.comprimesQuantity = randomInt(2, 200);
-        this.gelulesQuantity = randomInt(2, 200);
-        this.sachetsQuantity = randomInt(2, 200);
+        this.comprimesQuantity = randomInt(2, 100);
+        this.gelulesQuantity = randomInt(2, 100);
+        this.sachetsQuantity = randomInt(2, 100);
         this.dueDate = randomInt(2, 500);
     }
 
