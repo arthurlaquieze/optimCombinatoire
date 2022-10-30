@@ -13,11 +13,11 @@ public class Order {
 
     public Order() {
         /**
-         * Generate random order
+         * Constructor that generates a random order
          */
-        this.comprimesQuantity = randomInt(2, 200);
-        this.gelulesQuantity = randomInt(2, 200);
-        this.sachetsQuantity = randomInt(2, 200);
+        this.comprimesQuantity = randomInt(2, 100);
+        this.gelulesQuantity = randomInt(2, 100);
+        this.sachetsQuantity = randomInt(2, 100);
         this.dueDate = randomInt(2, 500);
     }
 
@@ -27,8 +27,8 @@ public class Order {
 
     @Override
     public String toString() {
-        return "Order [comprimesQuantity=" + comprimesQuantity + ", gelulesQuantity=" + gelulesQuantity
-                + ", sachetsQuantity=" + sachetsQuantity + ", dueDate=" + dueDate + "]";
+        return "Commande de \t" + comprimesQuantity + " comprimés\t" + gelulesQuantity
+                + " gélules\t" + sachetsQuantity + " sachets\tpour dans " + dueDate + " j";
     }
 
     public int getDueTime() {
