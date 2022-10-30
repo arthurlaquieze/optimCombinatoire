@@ -14,9 +14,9 @@ public class Pharmacy {
         int nOrders = orders.size();
 
         // create processes
-        Processus toPowderComprime = new Processus(20, 1, "Transformation to comprimé power");
-        Processus toPowderGelule = new Processus(7, 1, "Transformation to gélule powder");
-        Processus toPowderSachet = new Processus(14, 1, "Transformation to sachet powder");
+        Processus toPowderComprime = new Processus(20, 1, "Transformation vers poudre pour comprimé");
+        Processus toPowderGelule = new Processus(7, 1, "Transformation vers poudre pour gélule");
+        Processus toPowderSachet = new Processus(14, 1, "Transformation vers poudre pour sachet");
 
         Processus powderToComprime = new Processus(15, 2, "Conditionnement vers comprimé");
         Processus powderToGelule = new Processus(5, 2, "Conditionnement vers gélule");
@@ -128,6 +128,7 @@ public class Pharmacy {
 
         // solve
         Solver solver = model.getSolver();
+        solver.limitTime("100s");
         Solution solution = solver.findSolution();
 
         // print all orders
@@ -238,13 +239,13 @@ public class Pharmacy {
         }
     }
 
-    public static void main(String[] args) {
-        boolean useRandomOrders = true;
+    public static Integer solveOneProblem(int capacityStep1, boolean parallelStep2ComprimeGelule,
+            boolean useRandomOrders, boolean verbose) {
         int nOrders;
         List<Order> orders;
 
         if (useRandomOrders) {
-            nOrders = 200; // number of orders to simulate
+            nOrders = 100; // number of orders to simulate
             orders = generateOrders(nOrders);
         } else {
             nOrders = 3; // number of orders to simulate
@@ -253,6 +254,43 @@ public class Pharmacy {
             orders.add(new Order(30, 42, 58, 10));
             orders.add(new Order(21, 47, 54, 3));
         }
+
+        return pharmacyProblem(orders, capacityStep1, parallelStep2ComprimeGelule, verbose);
+    }
+
+    public static void benchQ4andQ6(int repetitions) {
+        int sumSolutionQ4 = 0;
+        int sumSolutionQ6 = 0;
+
+        int numberNoSolutionQ4 = 0;
+        int numberNoSolutionQ6 = 0;
+
+        for (int i = 0; i < repetitions; i++) {
+            Integer lastOrderCompletionQ4 = solveOneProblem(1, false, true, false);
+            Integer lastOrderCompletionQ6 = solveOneProblem(2, false, true, false);
+
+            if (lastOrderCompletionQ4 != null) {
+                sumSolutionQ4 += lastOrderCompletionQ4;
+            } else {
+                numberNoSolutionQ4 += 1;
+            }
+
+            if (lastOrderCompletionQ6 != null) {
+                sumSolutionQ6 += lastOrderCompletionQ6;
+            } else {
+                numberNoSolutionQ6 += 1;
+            }
+            System.out.print("*");
+        }
+
+        System.out.println(
+                "\nmoyenne sur " + repetitions + " répétitions :\nQ4 temps moyen de " + sumSolutionQ4 / repetitions
+                        + " minutes\tpour " + numberNoSolutionQ4 + " sans solutions\nQ6 temps moyen de "
+                        + sumSolutionQ6 / repetitions + " minutes\tpour " + numberNoSolutionQ6 + " sans solutions");
+    }
+
+    public static void main(String[] args) {
+        boolean useRandomOrders = true;
 
         /**
          * either:
@@ -264,32 +302,29 @@ public class Pharmacy {
          * 
          * 6: conditionnement en gélule et comprimé ne peut pas se faire en parallèle,
          * étape 1 capacité de 2
+         * 
+         * 7: question 6 et 4 répétées 100 fois, permet d'étudier l'impact du changement
+         * de capacité à l'étape 1.
+         * TODO parallelize to make it faster
          */
-        int nQuestion = 6;
-
-        int capacityStep1;
-        boolean parallelStep2ComprimeGelule;
+        int nQuestion = 2;
 
         switch (nQuestion) {
             case 2:
-                capacityStep1 = 1;
-                parallelStep2ComprimeGelule = true;
+                System.out.println(solveOneProblem(1, true, useRandomOrders, true));
                 break;
             case 4:
-                capacityStep1 = 1;
-                parallelStep2ComprimeGelule = false;
+                System.out.println(solveOneProblem(1, false, useRandomOrders, true));
                 break;
             case 6:
-                capacityStep1 = 2;
-                parallelStep2ComprimeGelule = false;
+                System.out.println(solveOneProblem(2, false, useRandomOrders, true));
+                break;
+            case 7:
+                benchQ4andQ6(100);
                 break;
             default:
-                capacityStep1 = 1;
-                parallelStep2ComprimeGelule = true;
+                System.out.println(solveOneProblem(1, true, useRandomOrders, true));
         }
-
-        Integer lastOrderCompletion = pharmacyProblem(orders, capacityStep1, parallelStep2ComprimeGelule, false);
-
-        System.out.println(lastOrderCompletion);
+        System.out.println("\nDone");
     }
 }
