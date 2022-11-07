@@ -16,3 +16,11 @@ Meanwhile, the compiled output files will be generated in the `bin` folder by de
 ## Dependency Management
 
 The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+
+## how to run
+
+Launch main inside Pharmacy.java
+Change the randomOrders boolean to false if you want to use the 3 predetermined orders
+Change the nQuestion int for running the code corresponding to the question
+
+Make sure choco-solver 4.10 is inside the lib folder.

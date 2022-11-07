@@ -1,9 +1,6 @@
 # macOS garbage
 .DS_Store
 
-# jar
-*.jar
-
 # out
 out/
 

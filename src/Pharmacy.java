@@ -290,6 +290,10 @@ public class Pharmacy {
     }
 
     public static void main(String[] args) {
+        /**
+         * Determines if questions 2, 4 and 6 will use random orders or the 3 specified
+         * in the PDF.
+         */
         boolean useRandomOrders = true;
 
         /**
