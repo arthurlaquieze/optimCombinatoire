@@ -24,3 +24,12 @@ Change the randomOrders boolean to false if you want to use the 3 predetermined 
 Change the nQuestion int for running the code corresponding to the question
 
 Make sure choco-solver 4.10 is inside the lib folder.
+
+Or jar command line
+
+USAGE:
+`java -jar --enable-preview Fortin_Laquieze_Osty_Rollet_opti-combi.jar <n°question> <useRandomOrders>`
+n°question: 2 | 4 | 6 | 7
+useRandomOrders: true | false
+EXAMPLE
+`java -jar --enable-preview Fortin_Laquieze_Osty_Rollet_opti-combi.jar 2 true`

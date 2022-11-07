@@ -1,3 +1,4 @@
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -292,9 +293,9 @@ public class Pharmacy {
     public static void main(String[] args) {
         /**
          * Determines if questions 2, 4 and 6 will use random orders or the 3 specified
-         * in the PDF.
+         * in the PDF. No effect for question 7 benchmark
          */
-        boolean useRandomOrders = true;
+        boolean useRandomOrders = Boolean.parseBoolean(args[1]);
 
         /**
          * either:
@@ -311,7 +312,7 @@ public class Pharmacy {
          * de capacité à l'étape 1.
          * TODO parallelize to make it faster
          */
-        int nQuestion = 2;
+        int nQuestion = Integer.parseInt(args[0]);
 
         switch (nQuestion) {
             case 2:
@@ -329,6 +330,6 @@ public class Pharmacy {
             default:
                 System.out.println(solveOneProblem(1, true, useRandomOrders, true));
         }
-        System.out.println("\nDone");
+        System.out.println("\nDone for question " + nQuestion + " random orders ? " + useRandomOrders);
     }
 }
